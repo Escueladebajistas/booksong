@@ -4,11 +4,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>SongBook Live</title>
 
 <style>
-
 body{
     background:#000;
     color:white;
@@ -35,6 +33,7 @@ body{
     border-radius:10px;
     font-size:22px;
     cursor:pointer;
+    text-align:left;
 }
 
 .songBtn:hover{
@@ -44,12 +43,14 @@ body{
 #viewer{
     display:none;
     padding:20px;
+    padding-bottom:100px;
 }
 
 #titulo{
     text-align:center;
     color:#FFD700;
     font-size:48px;
+    margin-bottom:10px;
 }
 
 #artista{
@@ -63,35 +64,74 @@ body{
     margin-bottom:25px;
     padding:20px;
     border-radius:10px;
+    border-left:5px solid #FFD700;
 }
 
 .nombre{
     color:#00E5FF;
     font-size:30px;
     margin-bottom:15px;
+    font-weight:bold;
 }
 
 .acordes{
     font-size:48px;
     white-space:pre-wrap;
     line-height:1.8;
+    font-weight:bold;
 }
 
 .controles{
     position:fixed;
-    bottom:15px;
-    right:15px;
+    bottom:0;
+    left:0;
+    width:100%;
+    background:#111;
+    padding:12px;
     display:flex;
+    justify-content:center;
     gap:10px;
+    border-top:1px solid #333;
 }
 
 button{
-    padding:12px;
+    padding:12px 18px;
     border:none;
     border-radius:8px;
     cursor:pointer;
+    font-size:16px;
 }
 
+.btn-menu{
+    background:#444;
+    color:white;
+}
+
+.btn-zoom{
+    background:#1976d2;
+    color:white;
+}
+
+.btn-scroll{
+    background:#c62828;
+    color:white;
+}
+
+@media(max-width:768px){
+
+    #titulo{
+        font-size:36px;
+    }
+
+    .acordes{
+        font-size:36px;
+    }
+
+    .nombre{
+        font-size:24px;
+    }
+
+}
 </style>
 
 </head>
@@ -99,7 +139,7 @@ button{
 
 <div id="menu">
 
-<h1>🎵 Repertorio</h1>
+<h1>🎵 SongBook Live</h1>
 
 <div id="listaCanciones"></div>
 
@@ -116,13 +156,21 @@ button{
 
 <div class="controles">
 
-<button onclick="volver()">📚</button>
+<button class="btn-menu" onclick="volver()">
+📚 Repertorio
+</button>
 
-<button onclick="zoomMas()">A+</button>
+<button class="btn-zoom" onclick="zoomMas()">
+A+
+</button>
 
-<button onclick="zoomMenos()">A-</button>
+<button class="btn-zoom" onclick="zoomMenos()">
+A-
+</button>
 
-<button onclick="autoScroll()">▶</button>
+<button class="btn-scroll" onclick="autoScroll()">
+▶ Autoscroll
+</button>
 
 </div>
 
@@ -152,6 +200,58 @@ contenido:`Dm   Eb
 Dm   Eb`
 }
 ]
+},
+
+{
+titulo:"Cuando Pase el Temblor",
+artista:"Soda Stereo",
+secciones:[
+{
+nombre:"INTRO",
+contenido:`Am / G / F / Em
+Am / G / F / Em`
+},
+{
+nombre:"ESTROFA 1",
+contenido:`Am / G / F / Em / C
+F / C
+Gm / C7 / Gm / D7 / F / B4
+
+Am / G / F / Em / C
+F / C
+Gm / C7 / Gm / D7 / F / B4`
+},
+{
+nombre:"CORO",
+contenido:`Em / B7 / Em / B7 / C7M`
+},
+{
+nombre:"PUENTE INSTRUMENTAL",
+contenido:`D6/C / C7M / D6/C / F7M(9/11+)`
+},
+{
+nombre:"ESTROFA 2",
+contenido:`Am / G / F / Em / C
+F / C
+Gm / C7 / Gm / D7 / F / B4`
+},
+{
+nombre:"CORO",
+contenido:`Em / B7 / Em / B7 / C7M`
+},
+{
+nombre:"PUENTE INSTRUMENTAL",
+contenido:`D6/C / C7M / D6/C / F7M(9/11+)`
+},
+{
+nombre:"INTERLUDIO INSTRUMENTAL",
+contenido:`Am / G / F / Em`
+},
+{
+nombre:"OUTRO / FINAL",
+contenido:`C / Dm / Bb`
+}
+]
 }
 
 ];
@@ -168,7 +268,9 @@ canciones.forEach((cancion,index)=>{
 html += `
 <button class="songBtn"
 onclick="abrirCancion(${index})">
-${cancion.titulo}
+🎵 ${cancion.titulo}
+<br>
+<small>${cancion.artista}</small>
 </button>
 `;
 
@@ -182,11 +284,11 @@ function abrirCancion(index){
 
 const cancion = canciones[index];
 
-menu.style.display="none";
-viewer.style.display="block";
+document.getElementById("menu").style.display="none";
+document.getElementById("viewer").style.display="block";
 
-titulo.innerText = cancion.titulo;
-artista.innerText = cancion.artista;
+document.getElementById("titulo").innerText = cancion.titulo;
+document.getElementById("artista").innerText = cancion.artista;
 
 let html='';
 
@@ -208,14 +310,16 @@ ${sec.contenido}
 
 });
 
-contenidoCancion.innerHTML = html;
+document.getElementById("contenidoCancion").innerHTML = html;
+
+window.scrollTo(0,0);
 
 }
 
 function volver(){
 
-viewer.style.display="none";
-menu.style.display="block";
+document.getElementById("viewer").style.display="none";
+document.getElementById("menu").style.display="block";
 
 window.scrollTo(0,0);
 
@@ -234,6 +338,8 @@ el.style.fontSize = fontSize + 'px';
 
 function zoomMenos(){
 
+if(fontSize > 20){
+
 fontSize -= 4;
 
 document.querySelectorAll('.acordes')
@@ -243,17 +349,19 @@ el.style.fontSize = fontSize + 'px';
 
 }
 
+}
+
 function autoScroll(){
 
 if(scroll){
 
 clearInterval(scroll);
-scroll=null;
+scroll = null;
 return;
 
 }
 
-scroll=setInterval(()=>{
+scroll = setInterval(()=>{
 
 window.scrollBy(0,1);
 

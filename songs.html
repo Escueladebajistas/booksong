@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SongBook Live</title>
+
+<style>
+body{
+    margin:0;
+    background:#000;
+    color:#fff;
+    font-family:Arial,sans-serif;
+}
+
+header{
+    background:#111;
+    padding:15px;
+    text-align:center;
+    position:sticky;
+    top:0;
+    border-bottom:1px solid #333;
+}
+
+#songList{
+    padding:20px;
+}
+
+.song-btn{
+    width:100%;
+    padding:15px;
+    margin-bottom:10px;
+    font-size:20px;
+    background:#222;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+.song-btn:hover{
+    background:#333;
+}
+
+#player{
+    display:none;
+    padding:20px;
+}
+
+#title{
+    font-size:42px;
+    color:#FFD700;
+    text-align:center;
+}
+
+#artist{
+    text-align:center;
+    margin-bottom:30px;
+    color:#ccc;
+}
+
+#section{
+    font-size:34px;
+    color:#00E5FF;
+    text-align:center;
+    margin-bottom:20px;
+}
+
+#content{
+    font-size:56px;
+    text-align:center;
+    line-height:1.8;
+    font-weight:bold;
+}
+
+.controls{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    background:#111;
+    padding:15px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+button{
+    padding:12px 20px;
+    font-size:18px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.back{
+    background:#555;
+    color:white;
+}
+
+.nav{
+    background:#c62828;
+    color:white;
+}
+
+.zoom{
+    background:#1976d2;
+    color:white;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>🎵 SongBook Live</h1>
+</header>
+
+<div id="songList"></div>
+
+<div id="player">
+
+<h2 id="title"></h2>
+<div id="artist"></div>
+
+<div id="section"></div>
+<div id="content"></div>
+
+<div class="controls">
+<button class="back" onclick="volver()">Repertorio</button>
+<button class="nav" onclick="anterior()">◀</button>
+<button class="zoom" onclick="menos()">A-</button>
+<button class="zoom" onclick="mas()">A+</button>
+<button class="nav" onclick="siguiente()">▶</button>
+</div>
+
+</div>
+
+<script>
+
+const canciones = [
+
+{
+titulo:"Las Flores",
+artista:"Café Tacvba",
+secciones:[
+{
+nombre:"Intro",
+contenido:"Bb   Dm   Eb   F\nx4"
+},
+{
+nombre:"Estrofa",
+contenido:"Bb   Dm   Eb   F\nx2"
+},
+{
+nombre:"Estribillo",
+contenido:"Dm   Eb\nDm   Eb"
+}
+]
+}
+
+];
+
+let cancionActual = null;
+let seccionActual = 0;
+let fuente = 56;
+
+function cargarCanciones(){
+
+let html='';
+
+canciones.forEach((cancion,index)=>{
+
+html += `
+<button class="song-btn"
+onclick="abrirCancion(${index})">
+${cancion.titulo}
+</button>
+`;
+
+});
+
+document.getElementById("songList").innerHTML = html;
+
+}
+
+function abrirCancion(index){
+
+cancionActual=index;
+seccionActual=0;
+
+document.getElementById("songList").style.display="none";
+document.getElementById("player").style.display="block";
+
+mostrar();
+
+}
+
+function mostrar(){
+
+const cancion=canciones[cancionActual];
+const seccion=cancion.secciones[seccionActual];
+
+title.innerText=cancion.titulo;
+artist.innerText=cancion.artista;
+section.innerText=seccion.nombre;
+content.innerText=seccion.contenido;
+
+}
+
+function siguiente(){
+
+const total=canciones[cancionActual].secciones.length;
+
+if(seccionActual<total-1){
+
+seccionActual++;
+mostrar();
+
+}
+
+}
+
+function anterior(){
+
+if(seccionActual>0){
+
+seccionActual--;
+mostrar();
+
+}
+
+}
+
+function volver(){
+
+document.getElementById("player").style.display="none";
+document.getElementById("songList").style.display="block";
+
+}
+
+function mas(){
+
+fuente+=4;
+content.style.fontSize=fuente+"px";
+
+}
+
+function menos(){
+
+fuente-=4;
+content.style.fontSize=fuente+"px";
+
+}
+
+cargarCanciones();
+
+</script>
+
+</body>
+</html>

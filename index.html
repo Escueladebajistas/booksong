@@ -4,136 +4,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>SongBook Live</title>
 
 <style>
+
 body{
-    margin:0;
     background:#000;
-    color:#fff;
+    color:white;
     font-family:Arial,sans-serif;
+    margin:0;
 }
 
-header{
-    background:#111;
-    padding:15px;
-    text-align:center;
-    position:sticky;
-    top:0;
-    border-bottom:1px solid #333;
-}
-
-#songList{
+#menu{
     padding:20px;
 }
 
-.song-btn{
+#menu h1{
+    text-align:center;
+    color:#FFD700;
+}
+
+.songBtn{
     width:100%;
-    padding:15px;
+    padding:18px;
     margin-bottom:10px;
-    font-size:20px;
-    background:#222;
+    background:#111;
     color:white;
     border:none;
     border-radius:10px;
+    font-size:22px;
     cursor:pointer;
 }
 
-.song-btn:hover{
-    background:#333;
+.songBtn:hover{
+    background:#222;
 }
 
-#player{
+#viewer{
     display:none;
     padding:20px;
 }
 
-#title{
-    font-size:42px;
+#titulo{
+    text-align:center;
     color:#FFD700;
-    text-align:center;
+    font-size:48px;
 }
 
-#artist{
+#artista{
     text-align:center;
-    margin-bottom:30px;
     color:#ccc;
+    margin-bottom:30px;
 }
 
-#section{
-    font-size:34px;
-    color:#00E5FF;
-    text-align:center;
-    margin-bottom:20px;
-}
-
-#content{
-    font-size:56px;
-    text-align:center;
-    line-height:1.8;
-    font-weight:bold;
-}
-
-.controls{
-    position:fixed;
-    bottom:0;
-    width:100%;
+.seccion{
     background:#111;
-    padding:15px;
+    margin-bottom:25px;
+    padding:20px;
+    border-radius:10px;
+}
+
+.nombre{
+    color:#00E5FF;
+    font-size:30px;
+    margin-bottom:15px;
+}
+
+.acordes{
+    font-size:48px;
+    white-space:pre-wrap;
+    line-height:1.8;
+}
+
+.controles{
+    position:fixed;
+    bottom:15px;
+    right:15px;
     display:flex;
-    justify-content:center;
     gap:10px;
 }
 
 button{
-    padding:12px 20px;
-    font-size:18px;
+    padding:12px;
     border:none;
     border-radius:8px;
     cursor:pointer;
 }
 
-.back{
-    background:#555;
-    color:white;
-}
-
-.nav{
-    background:#c62828;
-    color:white;
-}
-
-.zoom{
-    background:#1976d2;
-    color:white;
-}
 </style>
 
 </head>
-
 <body>
 
-<header>
-<h1>🎵 SongBook Live</h1>
-</header>
+<div id="menu">
 
-<div id="songList"></div>
+<h1>🎵 Repertorio</h1>
 
-<div id="player">
+<div id="listaCanciones"></div>
 
-<h2 id="title"></h2>
-<div id="artist"></div>
-
-<div id="section"></div>
-<div id="content"></div>
-
-<div class="controls">
-<button class="back" onclick="volver()">Repertorio</button>
-<button class="nav" onclick="anterior()">◀</button>
-<button class="zoom" onclick="menos()">A-</button>
-<button class="zoom" onclick="mas()">A+</button>
-<button class="nav" onclick="siguiente()">▶</button>
 </div>
+
+<div id="viewer">
+
+<h1 id="titulo"></h1>
+<h3 id="artista"></h3>
+
+<div id="contenidoCancion"></div>
+
+</div>
+
+<div class="controles">
+
+<button onclick="volver()">📚</button>
+
+<button onclick="zoomMas()">A+</button>
+
+<button onclick="zoomMenos()">A-</button>
+
+<button onclick="autoScroll()">▶</button>
 
 </div>
 
@@ -146,31 +135,38 @@ titulo:"Las Flores",
 artista:"Café Tacvba",
 secciones:[
 {
-nombre:"Intro",
-contenido:"Bb   Dm   Eb   F\nx4"
-
-nombre:"Estrofa",
-contenido:"Bb   Dm   Eb   F\nx2"
-
-nombre:"Estribillo",
-contenido:"Dm   Eb\nDm   Eb"
-
+nombre:"INTRO",
+contenido:`Bb   Dm   Eb   F
+Bb   Dm   Eb   F
+Bb   Dm   Eb   F
+Bb   Dm   Eb   F`
+},
+{
+nombre:"ESTROFA",
+contenido:`Bb   Dm   Eb   F
+Bb   Dm   Eb   F`
+},
+{
+nombre:"ESTRIBILLO",
+contenido:`Dm   Eb
+Dm   Eb`
+}
+]
 }
 
 ];
 
-let cancionActual = null;
-let seccionActual = 0;
-let fuente = 56;
+let fontSize = 48;
+let scroll = null;
 
-function cargarCanciones(){
+function cargarMenu(){
 
 let html='';
 
 canciones.forEach((cancion,index)=>{
 
 html += `
-<button class="song-btn"
+<button class="songBtn"
 onclick="abrirCancion(${index})">
 ${cancion.titulo}
 </button>
@@ -178,80 +174,94 @@ ${cancion.titulo}
 
 });
 
-document.getElementById("songList").innerHTML = html;
+document.getElementById("listaCanciones").innerHTML = html;
 
 }
 
 function abrirCancion(index){
 
-cancionActual=index;
-seccionActual=0;
+const cancion = canciones[index];
 
-document.getElementById("songList").style.display="none";
-document.getElementById("player").style.display="block";
+menu.style.display="none";
+viewer.style.display="block";
 
-mostrar();
+titulo.innerText = cancion.titulo;
+artista.innerText = cancion.artista;
 
-}
+let html='';
 
-function mostrar(){
+cancion.secciones.forEach(sec=>{
 
-const cancion=canciones[cancionActual];
-const seccion=cancion.secciones[seccionActual];
+html += `
+<div class="seccion">
 
-title.innerText=cancion.titulo;
-artist.innerText=cancion.artista;
-section.innerText=seccion.nombre;
-content.innerText=seccion.contenido;
+<div class="nombre">
+${sec.nombre}
+</div>
 
-}
+<div class="acordes">
+${sec.contenido}
+</div>
 
-function siguiente(){
+</div>
+`;
 
-const total=canciones[cancionActual].secciones.length;
+});
 
-if(seccionActual<total-1){
-
-seccionActual++;
-mostrar();
-
-}
-
-}
-
-function anterior(){
-
-if(seccionActual>0){
-
-seccionActual--;
-mostrar();
-
-}
+contenidoCancion.innerHTML = html;
 
 }
 
 function volver(){
 
-document.getElementById("player").style.display="none";
-document.getElementById("songList").style.display="block";
+viewer.style.display="none";
+menu.style.display="block";
+
+window.scrollTo(0,0);
 
 }
 
-function mas(){
+function zoomMas(){
 
-fuente+=4;
-content.style.fontSize=fuente+"px";
+fontSize += 4;
 
-}
-
-function menos(){
-
-fuente-=4;
-content.style.fontSize=fuente+"px";
+document.querySelectorAll('.acordes')
+.forEach(el=>{
+el.style.fontSize = fontSize + 'px';
+});
 
 }
 
-cargarCanciones();
+function zoomMenos(){
+
+fontSize -= 4;
+
+document.querySelectorAll('.acordes')
+.forEach(el=>{
+el.style.fontSize = fontSize + 'px';
+});
+
+}
+
+function autoScroll(){
+
+if(scroll){
+
+clearInterval(scroll);
+scroll=null;
+return;
+
+}
+
+scroll=setInterval(()=>{
+
+window.scrollBy(0,1);
+
+},25);
+
+}
+
+cargarMenu();
 
 </script>
 
